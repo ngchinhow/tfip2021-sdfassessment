@@ -45,6 +45,7 @@ public class ServerThread implements Runnable {
                     this.getSocket(),
                     this.getDocRoot()
                 );
+                // Add client threads to an ArrayList so that they can be closed later
                 setClientThread(ch);
                 System.out.println("Created thread");
                 this.getThreadPool().submit(ch);

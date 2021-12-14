@@ -33,6 +33,7 @@ public class HTTPClientConnection implements Runnable {
             );
             HTTPWriter httpWriter = new HTTPWriter(this.getSocket().getOutputStream())
         ) {
+            // Get request line
             String requestLine = inputReader.readLine();
             String header = requestLine;
 
@@ -50,29 +51,32 @@ public class HTTPClientConnection implements Runnable {
                     "HTTP/1.1 405 Method Not Allowed\r\n\r\n" + 
                     method + " not supported\r\n"
                 );
+                return;
+            }
+
+            if (query.equals("/")) {
+                // Replace empty resource with index.html
+                query = "\\index.html";
+            }
+            int i = 0;
+            boolean resourceExists = false;
+            File resource = null;
+            while (i < this.getDocRoot().length && !resourceExists) {
+                resource = new File(this.getDocRoot()[i] + query);
+                if (resource.exists() && resource.isFile()) {
+                    resourceExists = true;
+                }
+                i++;
+            }
+            
+            // Send resource if it exists; else 404 Not Found
+            if (resourceExists) {
+                sendResource(resource, httpWriter);
             } else {
-                if (query.equals("/")) {
-                    query = "\\index.html";
-                }
-                int i = 0;
-                boolean resourceExists = false;
-                File resource = null;
-                while (i < this.getDocRoot().length && !resourceExists) {
-                    resource = new File(this.getDocRoot()[i] + query);
-                    if (resource.exists() && resource.isFile()) {
-                        resourceExists = true;
-                    }
-                    i++;
-                }
-                
-                if (resourceExists) {
-                    sendResource(resource, httpWriter);
-                } else {
-                    httpWriter.writeString(
-                        "HTTP/1.1 404 Not Found\r\n\r\n" + 
-                        query + " not found\r\n"
-                    );
-                }
+                httpWriter.writeString(
+                    "HTTP/1.1 404 Not Found\r\n\r\n" + 
+                    query + " not found\r\n"
+                );
             }
         } catch (SocketException e) {
             System.out.println("Socket has been closed!");
