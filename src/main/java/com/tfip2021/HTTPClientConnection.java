@@ -58,9 +58,7 @@ public class HTTPClientConnection implements Runnable {
                 boolean resourceExists = false;
                 File resource = null;
                 while (i < this.getDocRoot().length && !resourceExists) {
-                    resource = new File(
-                        this.getDocRoot()[i] + query
-                    );
+                    resource = new File(this.getDocRoot()[i] + query);
                     if (resource.exists() && resource.isFile()) {
                         resourceExists = true;
                     }
@@ -92,8 +90,6 @@ public class HTTPClientConnection implements Runnable {
     public void sendResource(File resource, HTTPWriter httpWriter) throws Exception {
         String mimeType = Files.probeContentType(resource.toPath());
         
-        System.out.println(resource.toPath());
-        System.out.println(mimeType);
         httpWriter.writeString(
             "HTTP/1.1 200 OK\r\n" + 
             "Content-Type: " + mimeType + "\r\n"
